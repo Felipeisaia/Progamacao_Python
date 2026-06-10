@@ -1,6 +1,6 @@
 import requests
 
-API_KEY = "87ba7ccf317728d761b4d0b0c8d0e39b"
+API_KEY = "SUA_API_KEY"
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
 
 CIDADES = ["São Paulo", "London", "Tokyo", "New York", "Paris"]

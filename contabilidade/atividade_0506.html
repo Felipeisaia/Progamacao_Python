@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Atividade 05/06 — Giga</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      color: #222;
+      padding: 30px 20px;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: #1a3a5c;
+      color: white;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+
+    header h1 { font-size: 1.3rem; font-weight: bold; }
+    header p  { font-size: 0.85rem; margin-top: 4px; opacity: 0.8; }
+
+    section {
+      background: white;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+      padding: 20px 24px;
+    }
+
+    section h2 {
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #1a3a5c;
+      border-bottom: 2px solid #1a3a5c;
+      padding-bottom: 6px;
+      margin-bottom: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+    }
+
+    th {
+      background: #e8edf2;
+      text-align: left;
+      padding: 7px 10px;
+      font-weight: bold;
+      border: 1px solid #ccc;
+    }
+
+    td {
+      padding: 6px 10px;
+      border: 1px solid #ddd;
+    }
+
+    tr:nth-child(even) td { background: #f8f8f8; }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 0.78rem;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+
+    .custo    { background: #d0e8ff; color: #0a4a80; }
+    .despesa  { background: #ffe0c0; color: #7a3800; }
+    .fixo     { background: #e0f0e0; color: #1a5e1a; }
+    .variavel { background: #fde8e8; color: #8b0000; }
+
+    .valor { text-align: right; font-family: monospace; }
+    .total-row td { font-weight: bold; background: #e8edf2 !important; }
+
+    .dre-table td:first-child { width: 60%; }
+    .dre-table .destaque td { background: #1a3a5c !important; color: white; font-weight: bold; }
+    .dre-table .lucro    td { background: #1a6e1a !important; color: white; font-weight: bold; }
+
+    .analise {
+      font-size: 0.88rem;
+      line-height: 1.7;
+    }
+
+    .analise .item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .ok   { color: #1a6e1a; font-weight: bold; font-size: 1rem; }
+    .warn { color: #b85c00; font-weight: bold; font-size: 1rem; }
+
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>Contabilidade Aplicada à Informática — Atividade 05/06</h1>
+    <p>Empresa: Giga &nbsp;|&nbsp; Faturamento mensal: R$ 15.000,00 &nbsp;|&nbsp; Serviço: Suporte Técnico e Manutenção</p>
+  </header>
+
+  <!-- Q1 -->
+  <section>
+    <h2>Questão 1 — Custo vs. Despesa</h2>
+    <table id="tabQ1"></table>
+  </section>
+
+  <!-- Q2 -->
+  <section>
+    <h2>Questão 2 — Fixo vs. Variável</h2>
+    <table id="tabQ2"></table>
+  </section>
+
+  <!-- Q3 -->
+  <section>
+    <h2>Questão 3 — Margem de Contribuição e Ponto de Equilíbrio</h2>
+
+    <table class="dre-table" id="tabDRE"></table>
+  </section>
+
+  <!-- Análise -->
+  <section>
+    <h2>Análise Crítica</h2>
+    <div class="analise" id="analise"></div>
+  </section>
+
+</div>
+
+<script>
+  const faturamento = 15000;
+
+  const gastos = [
+    { desc: "Salário da equipe de programadores (dedicados ao serviço)", valor: 6000, tipo: "Custo",   comportamento: "Fixo" },
+    { desc: "Comissão do vendedor (5% sobre a receita)",                  valor:  750, tipo: "Despesa", comportamento: "Variável" },
+    { desc: "Estagiário para o administrativo",                           valor: 1200, tipo: "Despesa", comportamento: "Fixo" },
+    { desc: "Licenças de software de desenvolvimento (por usuário ativo)",valor:  800, tipo: "Custo",   comportamento: "Variável" },
+    { desc: "ISS — Imposto sobre Serviços (5% sobre faturamento)",        valor:  750, tipo: "Despesa", comportamento: "Variável" },
+    { desc: "Pró-labore do Lucas (Sócio-Administrador)",                  valor: 3000, tipo: "Despesa", comportamento: "Fixo" },
+    { desc: "Conta de internet dedicada da empresa",                      valor:  250, tipo: "Custo",   comportamento: "Fixo" },
+    { desc: "Material de escritório e limpeza",                           valor:  150, tipo: "Despesa", comportamento: "Fixo" },
+  ];
+
+  const brl = v => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const pct = v => (v * 100).toFixed(2) + "%";
+
+  // ── Q1 ─────────────────────────────────────────────────────────────────────
+  const q1 = document.getElementById("tabQ1");
+  q1.innerHTML = `<thead><tr><th>#</th><th>Descrição</th><th>Tipo</th><th class="valor">Valor</th></tr></thead>`;
+  const q1body = document.createElement("tbody");
+
+  let totalCusto = 0, totalDespesa = 0;
+  gastos.forEach((g, i) => {
+    const tr = document.createElement("tr");
+    const cls = g.tipo === "Custo" ? "custo" : "despesa";
+    tr.innerHTML = `<td>${i + 1}</td><td>${g.desc}</td>
+      <td><span class="tag ${cls}">${g.tipo}</span></td>
+      <td class="valor">${brl(g.valor)}</td>`;
+    q1body.appendChild(tr);
+    g.tipo === "Custo" ? totalCusto += g.valor : totalDespesa += g.valor;
+  });
+
+  const totRow = document.createElement("tr");
+  totRow.className = "total-row";
+  totRow.innerHTML = `<td colspan="3">Total Geral</td><td class="valor">${brl(totalCusto + totalDespesa)}</td>`;
+  q1body.appendChild(totRow);
+  q1.appendChild(q1body);
+
+  // ── Q2 ─────────────────────────────────────────────────────────────────────
+  const q2 = document.getElementById("tabQ2");
+  q2.innerHTML = `<thead><tr><th>#</th><th>Descrição</th><th>Tipo</th><th>Comportamento</th><th class="valor">Valor</th></tr></thead>`;
+  const q2body = document.createElement("tbody");
+
+  let totalVar = 0, totalFix = 0;
+  gastos.forEach((g, i) => {
+    const tr = document.createElement("tr");
+    const cTipo = g.tipo === "Custo" ? "custo" : "despesa";
+    const cComp = g.comportamento === "Fixo" ? "fixo" : "variavel";
+    tr.innerHTML = `<td>${i + 1}</td><td>${g.desc}</td>
+      <td><span class="tag ${cTipo}">${g.tipo}</span></td>
+      <td><span class="tag ${cComp}">${g.comportamento}</span></td>
+      <td class="valor">${brl(g.valor)}</td>`;
+    q2body.appendChild(tr);
+    g.comportamento === "Variável" ? totalVar += g.valor : totalFix += g.valor;
+  });
+
+  [["Subtotal Variável", totalVar], ["Subtotal Fixo", totalFix]].forEach(([label, val]) => {
+    const tr = document.createElement("tr");
+    tr.className = "total-row";
+    tr.innerHTML = `<td colspan="4">${label}</td><td class="valor">${brl(val)}</td>`;
+    q2body.appendChild(tr);
+  });
+
+  q2.appendChild(q2body);
+
+  // ── Q3 ─────────────────────────────────────────────────────────────────────
+  const mc     = faturamento - totalVar;
+  const mcPct  = mc / faturamento;
+  const pe     = totalFix / mcPct;
+  const lucro  = mc - totalFix;
+  const lucPct = lucro / faturamento;
+
+  // DRE — Q3.1 e Q3.2
+  const dre = document.getElementById("tabDRE");
+  dre.innerHTML = `<thead><tr><th>Descrição</th><th class="valor">R$</th><th class="valor">%</th></tr></thead>`;
+  const drebody = document.createElement("tbody");
+
+  const rows = [
+    ["Receita Bruta (Faturamento)", faturamento, null,    false],
+    ["(–) Gastos Variáveis Totais", totalVar,    null,    false],
+    ["(=) Margem de Contribuição",  mc,          mcPct,   "destaque"],
+    ["(–) Gastos Fixos Totais",     totalFix,    null,    false],
+    ["(=) Lucro Operacional",       lucro,       lucPct,  "lucro"],
+    ["Ponto de Equilíbrio",         pe,          null,    false],
+  ];
+
+  rows.forEach(([label, val, p, cls]) => {
+    const tr = document.createElement("tr");
+    if (cls) tr.className = cls;
+    tr.innerHTML = `<td>${label}</td><td class="valor">${brl(val)}</td><td class="valor">${p !== null ? pct(p) : "—"}</td>`;
+    drebody.appendChild(tr);
+  });
+
+  dre.appendChild(drebody);
+
+  // Análise Crítica — Q3.3
+  const analise = document.getElementById("analise");
+  const vantajoso = lucro > 0;
+  analise.innerHTML = `
+    <div class="item">
+      <span class="${vantajoso ? 'ok' : 'warn'}">${vantajoso ? '✔' : '✘'}</span>
+      <span>O valor de R$ 15.000,00 <strong>${vantajoso ? 'é vantajoso' : 'não é vantajoso'}</strong>.
+      O contrato gera um lucro operacional de <strong>${brl(lucro)} (${pct(lucPct)})</strong> por mês,
+      pois o faturamento supera o ponto de equilíbrio de ${brl(pe)}.</span>
+    </div>
+    <div class="item">
+      <span class="warn">⚠</span>
+      <span>A margem de ${pct(lucPct)} é estreita. Qualquer aumento nos gastos fixos
+      (ex.: reajuste de salários ou pró-labore) pode comprometer o resultado.</span>
+    </div>
+  `;
+</script>
+</body>
+</html>
